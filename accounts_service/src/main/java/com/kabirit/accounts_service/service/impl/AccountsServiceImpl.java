@@ -40,7 +40,7 @@ public class AccountsServiceImpl implements IAccountsService {
                     + customerDto.getMobileNumber());
         }
         Customer savedCustomer = customerRepository.save(customer);
-        accountsRepository.save((Accounts) createNewAccount(savedCustomer).getContent());
+        accountsRepository.save(createNewAccount(savedCustomer));
         return ResponseBuilder.getSuccessResponse(HttpStatus.CREATED, "Booking is successfully created");
 
     }
@@ -49,7 +49,7 @@ public class AccountsServiceImpl implements IAccountsService {
      * @param customer - Customer Object
      * @return the new account details
      */
-    private Response createNewAccount(Customer customer) {
+    private Accounts createNewAccount(Customer customer) {
         Accounts newAccount = new Accounts();
         newAccount.setCustomerId(customer.getCustomerId());
         long randomAccNumber = 1000000000L + new Random().nextInt(900000000);
@@ -57,7 +57,7 @@ public class AccountsServiceImpl implements IAccountsService {
         newAccount.setAccountNumber(randomAccNumber);
         newAccount.setAccountType(AccountsType.SAVINGS.getType());
         newAccount.setBranchAddress("123 Main Street, New York");
-        return ResponseBuilder.getSuccessResponse(HttpStatus.OK, "Retrieve newAccount details", newAccount);
+        return newAccount;
     }
 
     /**

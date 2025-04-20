@@ -19,13 +19,4 @@ public enum AccountsType {
     public String getType() {
         return type;
     }
-
-    public static AccountsType fromString(String type) {
-        for (AccountsType accountType : AccountsType.values()) {
-            if (accountType.getType().equalsIgnoreCase(type)) {
-                return accountType;
-            }
-        }
-        throw new IllegalArgumentException("No enum constant " + AccountsType.class.getCanonicalName() + "." + type);
-    }
 }
