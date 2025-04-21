@@ -4,7 +4,7 @@ spring:
   application:
     name: accounts_service
   datasource:
-    url: jdbc:h2:file:/home/nasimkabir/test;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:/test
     driverClassName: org.h2.Driver
     username: sa
     password: ''
@@ -20,3 +20,21 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  config:
+    import:
+      - "application_test.yml"
+      - "application_prod.yml"
+  profiles:
+   active: "prod"
+
+build:
+  version: "1.0.2"
+
+accounts:
+  message: "Welcome to EazyBank accounts related Default APIs "
+  contactDetails:
+    name: "Nasim Kabir - SWE Lead"
+    email: "nasim@gmail.com"
+  onCallSupport:
+    - (+880) 1837745754
+    - (+880) 1837745758
