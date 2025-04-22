@@ -1,6 +1,6 @@
 package com.kabirit.accounts_service;
 
-import com.kabirit.accounts_service.dto.AccountsContactInfoDto;
+import com.kabirit.accounts_service.dto.LoansContactInfoDto;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;
@@ -10,7 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
-@EnableConfigurationProperties(value = {AccountsContactInfoDto.class})
+@EnableConfigurationProperties(value = {LoansContactInfoDto.class})
 @SpringBootApplication
 @OpenAPIDefinition(
         info = @Info(

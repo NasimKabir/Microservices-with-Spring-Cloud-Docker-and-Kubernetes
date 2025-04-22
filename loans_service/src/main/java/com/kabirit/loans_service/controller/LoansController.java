@@ -1,12 +1,17 @@
 package com.kabirit.loans_service.controller;
 
+import com.kabirit.loans_service.dto.LoansContactInfoDto;
 import com.kabirit.loans_service.dto.LoansDto;
 import com.kabirit.loans_service.exceptions.Response;
+import com.kabirit.loans_service.exceptions.ResponseBuilder;
 import com.kabirit.loans_service.service.ILoansService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,11 +26,19 @@ import org.springframework.web.bind.annotation.*;
 )
 @RestController
 @RequestMapping(path = "/api", produces = {MediaType.APPLICATION_JSON_VALUE})
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Validated
 public class LoansController {
 
-    private ILoansService iLoansService;
+    private final ILoansService iLoansService;
+
+    @Value("${build.version}")
+    private String buildVersion;
+
+    private final Environment environment;
+
+    private final LoansContactInfoDto loansContactInfoDto;
+
 
     @PostMapping("/create")
     public Response createLoan(@RequestParam
@@ -52,6 +65,22 @@ public class LoansController {
                                       @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
                                       String mobileNumber) {
         return iLoansService.deleteLoan(mobileNumber);
+    }
+
+    @GetMapping("/build-info")
+    public Response getBuildInfo() {
+        return ResponseBuilder.getSuccessResponse(HttpStatus.OK, "Build Version: " + buildVersion);
+    }
+
+    @GetMapping("/java-version")
+    public Response getJavaVersion() {
+        return ResponseBuilder.getSuccessResponse(HttpStatus.OK, "JDK Version: " + environment.getProperty("JAVA_HOME"));
+    }
+
+
+    @GetMapping("/contact-info")
+    public Response getContactInfo() {
+        return ResponseBuilder.getSuccessResponse(HttpStatus.OK, "Loans Contact Info ", loansContactInfoDto);
     }
 
 }

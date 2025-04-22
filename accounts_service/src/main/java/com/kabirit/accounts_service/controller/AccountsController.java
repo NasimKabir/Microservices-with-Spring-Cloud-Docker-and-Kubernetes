@@ -1,13 +1,12 @@
 package com.kabirit.accounts_service.controller;
 
-import com.kabirit.accounts_service.dto.AccountsContactInfoDto;
+import com.kabirit.accounts_service.dto.LoansContactInfoDto;
 import com.kabirit.accounts_service.dto.CustomerDto;
 import com.kabirit.accounts_service.exceptions.Response;
 import com.kabirit.accounts_service.exceptions.ResponseBuilder;
 import com.kabirit.accounts_service.service.IAccountsService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -32,7 +31,8 @@ public class AccountsController {
     private String buildVersion;
 
     private final Environment environment;
-    private final AccountsContactInfoDto accountsContactInfoDto;
+
+    private final LoansContactInfoDto accountsContactInfoDto;
 
     @PostMapping("/create")
     public Response createAccount(@Valid @RequestBody CustomerDto customerDto) {

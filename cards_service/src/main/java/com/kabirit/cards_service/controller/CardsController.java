@@ -1,13 +1,18 @@
 package com.kabirit.cards_service.controller;
 
 
+import com.kabirit.cards_service.dto.CardsContactInfoDto;
 import com.kabirit.cards_service.dto.CardsDto;
 import com.kabirit.cards_service.exceptions.Response;
+import com.kabirit.cards_service.exceptions.ResponseBuilder;
 import com.kabirit.cards_service.service.ICardsService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,11 +27,19 @@ import org.springframework.web.bind.annotation.*;
 )
 @RestController
 @RequestMapping(path = "/api", produces = {MediaType.APPLICATION_JSON_VALUE})
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Validated
 public class CardsController {
 
-    private ICardsService iCardsService;
+    private final ICardsService iCardsService;
+
+    @Value("${build.version}")
+    private String buildVersion;
+
+    private final Environment environment;
+
+    private final CardsContactInfoDto cardsContactInfoDto;
+
 
 
     @PostMapping("/create")
@@ -54,6 +67,22 @@ public class CardsController {
                                                                 @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
                                                                 String mobileNumber) {
         return iCardsService.deleteCard(mobileNumber);
+    }
+
+    @GetMapping("/build-info")
+    public Response getBuildInfo() {
+        return ResponseBuilder.getSuccessResponse(HttpStatus.OK, "Build Version: " + buildVersion);
+    }
+
+    @GetMapping("/java-version")
+    public Response getJavaVersion() {
+        return ResponseBuilder.getSuccessResponse(HttpStatus.OK, "JDK Version: " + environment.getProperty("JAVA_HOME"));
+    }
+
+
+    @GetMapping("/contact-info")
+    public Response getContactInfo() {
+        return ResponseBuilder.getSuccessResponse(HttpStatus.OK, "Cards Contact Info ", cardsContactInfoDto);
     }
 
 }
