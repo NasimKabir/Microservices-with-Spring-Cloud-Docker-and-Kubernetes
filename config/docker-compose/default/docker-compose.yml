@@ -1,0 +1,112 @@
+version: '3.9'
+services:
+  rabbitmq:
+    image: "rabbitmq:3.12-management"
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+    networks:
+      - nasim_network
+
+  configserver:
+    image: "nasimkabir/config_server:v7"
+    container_name: config_server
+    ports:
+      - "8071:8071"
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_PROFILES_ACTIVE: test
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8071/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 30
+      start_period: 60s  # Give more time to start
+    networks:
+      - nasim_network
+
+
+  accounts:
+    image: "nasimkabir/accounts_service:v5"
+    container_name: accounts_service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+#      SPRING_PROFILES_ACTIVE: test
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+#      SPRING_APPLICATION_NAME: accounts
+    deploy:
+      resources:
+        limits:
+          memory: 7000m
+    depends_on:
+      configserver:
+        condition: service_healthy
+    networks:
+      - nasim_network
+
+  loans:
+    image: "nasimkabir/loans_service:v3"
+    container_name: loans_service
+    ports:
+      - "8090:8090"
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+    deploy:
+      resources:
+        limits:
+          memory: 7000m
+    depends_on:
+      configserver:
+        condition: service_healthy
+    networks:
+      - nasim_network
+
+  cards:
+    image: "nasimkabir/cards_service:v3"
+    container_name: cards_service
+    ports:
+      - "9000:9000"
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+    deploy:
+      resources:
+        limits:
+          memory: 7000m
+    depends_on:
+      configserver:
+        condition: service_healthy
+    networks:
+      - nasim_network
+
+networks:
+  nasim_network:
+    driver: bridge

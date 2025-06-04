@@ -1,0 +1,36 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: cards_service
+  datasource:
+    url: jdbc:h2:mem:testdb1
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ''
+  h2:
+    console:
+      enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  config:
+    import:
+      - "application_test.yml"
+      - "application_prod.yml"
+  profiles:
+    active: "prod"
+
+build:
+  version: "1.0.2"
+
+cards:
+   message: "Welcome to EazyBank cards related Default APIs "
+   contactDetails:
+     name: "Nasim Kabir - SWE Lead"
+     email: "nasim@gmail.com"
+   onCallSupport:
+     - (+880) 1837745754
+     - (+880) 1837745758

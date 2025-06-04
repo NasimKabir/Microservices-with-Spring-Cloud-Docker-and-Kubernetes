@@ -1,0 +1,45 @@
+server:
+  port: 8071
+
+spring:
+  application:
+    name: config-server  # Standard hyphenated name
+  profiles:
+    # active: native
+    active: git
+  cloud:
+    config:
+      server:
+        git:
+#          uri: file://${HOME}/EasyBank_config
+          uri: https://github.com/NasimKabir/config-server
+          search-paths: "*server"
+          default-label: main
+          timeout: 5
+          clone-on-start: true
+          force-pull: true
+#      native:
+#        search-locations: classpath:/config/
+
+
+  # rabbitmq
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+
+encrypt:
+  key: my-secret-encryption-key
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
