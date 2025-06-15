@@ -1,38 +1,71 @@
-# services
 services:
+  rabbitmq:
+    image: "rabbitmq:3.12-management"
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
+
+
+  configserver:
+    image: "nasimkabir/config_server:v7"
+    container_name: config_server
+    ports:
+      - "8071:8071"
+    extends:
+      file: common-config.yml
+      service: microservice-base-config
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8071/actuator/health || exit 1" ]
+      interval: 15s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+
+
   accounts:
-    image: "nasimkabir/accounts_service:v1"
-    container_name: accounts_ms
+    image: "nasimkabir/accounts_service:v5"
+    container_name: accounts_service
     ports:
       - "8080:8080"
-    deploy:
-      resources:
-        limits:
-          memory: 700m
-    networks:
-      - nasim_network
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+
   loans:
-    image: "nasimkabir/loans_service:v1"
+    image: "nasimkabir/loans_service:v3"
     container_name: loans_service
     ports:
       - "8090:8090"
-    deploy:
-      resources:
-        limits:
-          memory: 700m
-    networks:
-      - nasim_network
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+
   cards:
-    image: "nasimkabir/cards_service:v1"
+    image: "nasimkabir/cards_service:v3"
     container_name: cards_service
     ports:
       - "9000:9000"
-    deploy:
-      resources:
-        limits:
-          memory: 700m
-    networks:
-      - nasim_network
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+
 networks:
   nasim_network:
-    driver: "bridge"
+    driver: bridge
