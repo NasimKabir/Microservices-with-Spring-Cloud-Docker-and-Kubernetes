@@ -1,0 +1,29 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: accounts_service
+  datasource:
+    url: jdbc:mysql://localhost:3309/accountsdb
+    driverClassName: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+
+# actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+

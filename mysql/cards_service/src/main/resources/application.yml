@@ -1,0 +1,22 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: cards_service
+  datasource:
+    url: jdbc:mysql://localhost:3308/cardsdb?useSSL=false&allowPublicKeyRetrieval=true
+    driverClassName: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
