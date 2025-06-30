@@ -31,17 +31,16 @@ services:
 
 
   configserver:
-    image: "nasimkabir/config_server:v9"
+    image: nasimkabir/config_server:v9
     container_name: config_server
     ports:
       - "8071:8071"
-#    healthcheck:
-#      test: [ "CMD-SHELL","curl --fail --silent localhost:8071/actuator/health/readiness | grep UP || exit 1" ]
-##      test: ["CMD-SHELL", "curl", "-f", "http://localhost:8071/actuator/health"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 10
-#      start_period: 10s
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8071/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
     extends:
       file: common-config.yml
       service: microservice-base-config
@@ -57,6 +56,8 @@ services:
     depends_on:
       accountsdb:
         condition: service_healthy
+      configserver:
+        condition: service_started
     extends:
       file: common-config.yml
       service: microservice-configserver-config
@@ -71,6 +72,8 @@ services:
     depends_on:
       loansdb:
         condition: service_healthy
+      configserver:
+        condition: service_started
     extends:
       file: common-config.yml
       service: microservice-configserver-config
@@ -86,6 +89,8 @@ services:
     depends_on:
       cardsdb:
         condition: service_healthy
+      configserver:
+        condition: service_started
     extends:
       file: common-config.yml
       service: microservice-configserver-config

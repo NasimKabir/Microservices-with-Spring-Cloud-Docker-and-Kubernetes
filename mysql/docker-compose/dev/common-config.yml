@@ -1,7 +1,7 @@
 services:
   network-deploy-service:
     networks:
-      - nasim_network
+      - dev_network
 
   microservice-db-config:
     extends:

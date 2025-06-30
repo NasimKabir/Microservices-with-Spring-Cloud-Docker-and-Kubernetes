@@ -1,70 +1,100 @@
 services:
-  rabbitmq:
-    image: "rabbitmq:3.12-management"
-    container_name: rabbitmq
+  accountsdb:
+    container_name: accountsdb
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "3309:3306"
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
-      interval: 10s
-      timeout: 10s
-      retries: 20
-      start_period: 30s
-
+      MYSQL_DATABASE: accountsdb
     extends:
       file: common-config.yml
-      service: network-deploy-service
+      service: microservice-db-config
+
+  loansdb:
+    container_name: loans_db
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: loansdb
+    extends:
+      file: common-config.yml
+      service: microservice-db-config
+
+  cardsdb:
+    container_name: cards_db
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_DATABASE: cardsdb
+    extends:
+      file: common-config.yml
+      service: microservice-db-config
 
 
   configserver:
-    image: "nasimkabir/config_server:v7"
+    image: nasimkabir/config_server:v9
     container_name: config_server
     ports:
       - "8071:8071"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8071/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
     extends:
       file: common-config.yml
       service: microservice-base-config
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8071/actuator/health || exit 1" ]
-      interval: 15s
-      timeout: 10s
-      retries: 30
-      start_period: 60s
 
 
   accounts:
-    image: "nasimkabir/accounts_service:v5"
+    image: "nasimkabir/accounts_service:v6"
     container_name: accounts_service
     ports:
       - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://accountsdb:3306/accountsdb
+    depends_on:
+      accountsdb:
+        condition: service_healthy
+      configserver:
+        condition: service_started
     extends:
       file: common-config.yml
       service: microservice-configserver-config
 
   loans:
-    image: "nasimkabir/loans_service:v3"
+    image: "nasimkabir/loans_service:v5"
     container_name: loans_service
     ports:
       - "8090:8090"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://loansdb:3306/loansdb
+    depends_on:
+      loansdb:
+        condition: service_healthy
+      configserver:
+        condition: service_started
     extends:
       file: common-config.yml
       service: microservice-configserver-config
 
+
   cards:
-    image: "nasimkabir/cards_service:v3"
+    image: "nasimkabir/cards_service:v5"
     container_name: cards_service
     ports:
       - "9000:9000"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://cardsdb:3306/cardsdb
+    depends_on:
+      cardsdb:
+        condition: service_healthy
+      configserver:
+        condition: service_started
     extends:
       file: common-config.yml
       service: microservice-configserver-config
+
 
 networks:
   nasim_network:

@@ -1,29 +1,34 @@
 services:
   network-deploy-service:
     networks:
-      - nasim_network
+      - prod_network
 
-  microservice-base-config:
-    environment:
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
-      SPRING_PROFILES_ACTIVE: prod
+  microservice-db-config:
     extends:
       service: network-deploy-service
-      deploy:
-        resources:
-          limits:
-            memory: 700m
+    image: mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
+      interval: 10s
+      start_period: 10s
+    environment:
+      MYSQL_ROOT_PASSWORD: root
 
+  microservice-base-config:
+    extends:
+      service: network-deploy-service
+    deploy:
+      resources:
+        limits:
+          memory: 700m
 
   microservice-configserver-config:
     extends:
       service: microservice-base-config
-    depends_on:
-      configserver:
-        condition: service_healthy
     environment:
-      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071
-      SPRING_PROFILES_ACTIVE: default
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
