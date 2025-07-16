@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: loans-service
+  profiles:
+    active: test
+  cloud:
+    config:
+      uri: http://localhost:8071
+
+
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    healthcheck:
+      enabled: true
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: Loans Service for managing card operations
+    version: 1.0.0
