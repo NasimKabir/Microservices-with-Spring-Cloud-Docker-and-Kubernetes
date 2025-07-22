@@ -21,18 +21,23 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/api", produces = {MediaType.APPLICATION_JSON_VALUE})
-@RequiredArgsConstructor
 @Validated
 public class AccountsController {
 
     private final IAccountsService accountsService;
 
-    @Value("${build.version}")
+    @Value("${build.version:2.0}")
     private String buildVersion;
 
     private final Environment environment;
 
     private final LoansContactInfoDto accountsContactInfoDto;
+
+    public AccountsController(IAccountsService accountsService, Environment environment, LoansContactInfoDto accountsContactInfoDto) {
+        this.accountsService = accountsService;
+        this.environment = environment;
+        this.accountsContactInfoDto = accountsContactInfoDto;
+    }
 
     @PostMapping("/create")
     public Response createAccount(@Valid @RequestBody CustomerDto customerDto) {
@@ -40,7 +45,7 @@ public class AccountsController {
     }
 
 
-    @GetMapping("/fetchCustomerDetails")
+    @GetMapping("/fetchCustomerAccountsDetails")
     public Response fetchAccountDetails(@RequestParam
                                         @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
                                         String mobileNumber) {

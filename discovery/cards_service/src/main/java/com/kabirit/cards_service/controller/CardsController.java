@@ -27,33 +27,37 @@ import org.springframework.web.bind.annotation.*;
 )
 @RestController
 @RequestMapping(path = "/api", produces = {MediaType.APPLICATION_JSON_VALUE})
-@RequiredArgsConstructor
 @Validated
+//@RequiredArgsConstructor
 public class CardsController {
 
     private final ICardsService iCardsService;
-
-    @Value("${build.version}")
-    private String buildVersion;
-
+    private final CardsContactInfoDto cardsContactInfoDto;
     private final Environment environment;
 
-    private final CardsContactInfoDto cardsContactInfoDto;
+    @Value("${build.version:2.0}")
+    private String buildVersion;
 
+    public CardsController(ICardsService iCardsService, CardsContactInfoDto cardsContactInfoDto, Environment environment) {
+        this.iCardsService = iCardsService;
+        this.cardsContactInfoDto = cardsContactInfoDto;
+        this.environment = environment;
+        System.out.println("CardsController constructor called with buildVersion: " + buildVersion);
+    }
 
 
     @PostMapping("/create")
     public Response createCard(@Valid @RequestParam
-                                                      @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
-                                                      String mobileNumber) {
-       return iCardsService.createCard(mobileNumber);
+                               @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
+                               String mobileNumber) {
+        return iCardsService.createCard(mobileNumber);
     }
 
 
     @GetMapping("/fetch")
     public Response fetchCardDetails(@RequestParam
-                                                               @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
-                                                               String mobileNumber) {
+                                     @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
+                                     String mobileNumber) {
         return iCardsService.fetchCard(mobileNumber);
     }
 
@@ -64,8 +68,8 @@ public class CardsController {
 
     @DeleteMapping("/delete")
     public Response deleteCardDetails(@RequestParam
-                                                                @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
-                                                                String mobileNumber) {
+                                      @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
+                                      String mobileNumber) {
         return iCardsService.deleteCard(mobileNumber);
     }
 

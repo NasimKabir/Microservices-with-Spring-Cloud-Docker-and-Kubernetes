@@ -1,8 +1,9 @@
+server:
+  port: 8761
+
 spring:
   application:
-    name: eureka_server
-  config:
-    import: "configserver:http://localhost:8071/"
+    name: eureka-server
 
   management:
     endpoints:

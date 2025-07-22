@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author nasimkabir
  * @date 16/7/25
  */
-@FeignClient(name = "LOANS_SERVICE")
+@FeignClient(name = "loans")
 public interface LoansFeignClients {
     @GetMapping(value = "/api/fetch",consumes = "application/json")
     Response fetchLoanDetails(@RequestParam

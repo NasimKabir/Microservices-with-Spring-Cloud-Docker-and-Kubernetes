@@ -121,7 +121,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <image>
-                        <name>nasimkabir/${project.artifactId}:v5</name>
+                        <name>nasimkabir/${project.artifactId}:v10</name>
                     </image>
                     <excludes>
                         <exclude>

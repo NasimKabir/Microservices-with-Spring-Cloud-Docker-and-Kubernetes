@@ -26,18 +26,23 @@ import org.springframework.web.bind.annotation.*;
 )
 @RestController
 @RequestMapping(path = "/api", produces = {MediaType.APPLICATION_JSON_VALUE})
-@RequiredArgsConstructor
 @Validated
 public class LoansController {
 
     private final ILoansService iLoansService;
 
-    @Value("${build.version}")
+    @Value("${build.version:2.0}")
     private String buildVersion;
 
     private final Environment environment;
 
     private final LoansContactInfoDto loansContactInfoDto;
+
+    public LoansController(ILoansService iLoansService, Environment environment, LoansContactInfoDto loansContactInfoDto) {
+        this.iLoansService = iLoansService;
+        this.environment = environment;
+        this.loansContactInfoDto = loansContactInfoDto;
+    }
 
 
     @PostMapping("/create")

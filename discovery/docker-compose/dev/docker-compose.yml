@@ -1,0 +1,87 @@
+services:
+  config_server:
+    image: nasimkabir/config_server:v10
+    container_name: config_server
+    ports:
+      - "8071:8071"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8071/actuator/health || exit 1"]
+#      test: "curl --fail --silent localhost:8071/actuator/health/readiness | grep UP || exit 1"
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+    extends:
+      file: common-config.yml
+      service: microservice-base-config
+
+
+  eureka_server:
+    image: nasimkabir/eureka_server:v1
+    container_name: eureka_server
+    ports:
+      - "8761:8761"
+    depends_on:
+      config_server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1"]
+#      test: "curl --fail --silent localhost:8761/actuator/health/readiness | grep UP || exit 1"
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+    extends:
+      file: common-config.yml
+      service: microservice-base-config
+
+  accounts:
+    image: "nasimkabir/accounts_service:v10"
+    container_name: accounts_service
+    ports:
+      - "8080:8080"
+    networks:
+      - nasim_network
+    depends_on:
+      eureka_server:
+        condition: service_healthy
+      config_server:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  loans:
+    image: "nasimkabir/loans_service:v10"
+    container_name: loans_service
+    ports:
+      - "8090:8090"
+    depends_on:
+      eureka_server:
+        condition: service_healthy
+      config_server:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+
+  cards:
+    image: "nasimkabir/cards_service:v10"
+    container_name: cards_service
+    ports:
+      - "9000:9000"
+    depends_on:
+      eureka_server:
+        condition: service_healthy
+      config_server:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+
+networks:
+  nasim_network:
+    driver: bridge
+    attachable: true
