@@ -1,27 +1,15 @@
 spring:
   application:
-    name: loans-service
-  profiles:
-    active: test
+    name: ${SPRING_APPLICATION_NAME:default-service}
   cloud:
     config:
-      uri: http://localhost:8071
-
-
+      uri: ${CONFIG_SERVER_URI:http://localhost:8071}
+      fail-fast: true
+      retry:
+        initial-interval: 2000
+        max-interval: 5000
+        max-attempts: 10
 
 eureka:
   instance:
-    prefer-ip-address: true
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-    healthcheck:
-      enabled: true
-
-info:
-  app:
-    name: ${spring.application.name}
-    description: Loans Service for managing card operations
-    version: 1.0.0
+    instance-id: ${spring.application.name}:${random.value}

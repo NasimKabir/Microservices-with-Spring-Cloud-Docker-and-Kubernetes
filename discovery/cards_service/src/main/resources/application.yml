@@ -2,7 +2,9 @@ server:
   port: 9000
 spring:
   application:
-    name: cards_service
+    name: cards-service
+  profiles:
+    active: "test"
   datasource:
     url: jdbc:h2:mem:testdb1
     driverClassName: org.h2.Driver
@@ -17,6 +19,9 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+
 # actuator
 management:
   endpoints:
@@ -25,7 +30,7 @@ management:
         include: "*"
   endpoint:
     shutdown:
-      enabled: true
+      access: unrestricted
     health:
       show-details: always
 
@@ -37,3 +42,19 @@ endpoints:
   info:
     env:
       enabled: true
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: Cards Service for managing card operations
+    version: 1.0.0

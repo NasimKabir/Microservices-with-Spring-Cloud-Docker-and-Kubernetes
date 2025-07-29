@@ -1,7 +1,0 @@
-spring:
-  application:
-    name: eureka-server  # Must match config file name
-  cloud:
-    config:
-      uri: http://localhost:8071
-      # Remove search-paths completely

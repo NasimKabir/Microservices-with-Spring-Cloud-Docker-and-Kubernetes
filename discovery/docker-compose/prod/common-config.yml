@@ -4,26 +4,30 @@ services:
       - nasim_network
 
   microservice-base-config:
-    environment:
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
-      SPRING_PROFILES_ACTIVE: prod
     extends:
       service: network-deploy-service
-      deploy:
-        resources:
-          limits:
-            memory: 700m
-
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    environment:
+      CONFIG_SERVER_HOST: "configserver"
+      EUREKA_SERVICE_URL: "http://eurekaserver:8761/eureka/"
+#      SPRING_PROFILES_ACTIVE: "test"
 
   microservice-configserver-config:
     extends:
       service: microservice-base-config
-    depends_on:
-      configserver:
-        condition: service_healthy
     environment:
-      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071
-      SPRING_PROFILES_ACTIVE: default
+      SERVICE_NAME: "configserver"
+      SPRING_APPLICATION_NAME: "config-server"
+      SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8071"
+
+  microservice-eureka-config:
+    extends:
+      service: microservice-configserver-config
+    environment:
+      SERVICE_NAME: "eurekaserver"
+      SPRING_PROFILES_ACTIVE: "prod"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8761/eureka/"
+      EUREKA_INSTANCE_PREFERIPADDRESS: "false"
