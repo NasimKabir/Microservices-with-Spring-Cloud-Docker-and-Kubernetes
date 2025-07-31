@@ -28,6 +28,6 @@ services:
       service: microservice-configserver-config
     environment:
       SERVICE_NAME: "eurekaserver"
-      SPRING_PROFILES_ACTIVE: "test"
+      SPRING_PROFILES_ACTIVE: "default"
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8761/eureka/"
       EUREKA_INSTANCE_PREFERIPADDRESS: "false"

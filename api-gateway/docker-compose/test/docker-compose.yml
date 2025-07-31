@@ -1,71 +1,148 @@
 services:
-  rabbitmq:
-    image: "rabbitmq:3.12-management"
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
-      interval: 10s
-      timeout: 10s
-      retries: 20
-      start_period: 30s
-
-    extends:
-      file: common-config.yml
-      service: network-deploy-service
-
-
   configserver:
-    image: "nasimkabir/config_server:v7"
-    container_name: config_server
+    image: nasimkabir/config_server:v12
+    container_name: configserver
+    hostname: configserver
+    environment:
+      - SPRING_APPLICATION_NAME=configserver
+      - SERVICE_NAME=configserver
     ports:
       - "8071:8071"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8071/actuator/health || exit 1" ]
+      #      test: "curl --fail --silent localhost:8071/actuator/health/readiness | grep UP || exit 1"
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
     extends:
       file: common-config.yml
       service: microservice-base-config
+
+
+  eurekaserver:
+    image: nasimkabir/eureka_server:v3
+    container_name: eurekaserver
+    hostname: eurekaserver
+    environment:
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+      EUREKA_CLIENT_FETCH_REGISTRY: "false"
+    ports:
+      - "8761:8761"
     depends_on:
-      rabbitmq:
+      configserver:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8071/actuator/health || exit 1" ]
-      interval: 15s
-      timeout: 10s
-      retries: 30
-      start_period: 60s
-
+      test: [ "CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1" ]
+      #      test: "curl --fail --silent localhost:8761/actuator/health/readiness | grep UP || exit 1"
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+    extends:
+      file: common-config.yml
+      service: microservice-base-config
 
   accounts:
-    image: "nasimkabir/accounts_service:v5"
+    image: "nasimkabir/accounts_service:v12"
     container_name: accounts_service
+    hostname: accounts-service
+    environment:
+      - SPRING_APPLICATION_NAME=accounts-service
+      - SERVICE_NAME=accounts-service
+
     ports:
-      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      eurekaserver:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8081/actuator/health || exit 1" ]
+      #      test: "curl --fail --silent localhost:8761/actuator/health/readiness | grep UP || exit 1"
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eureka-config
 
   loans:
-    image: "nasimkabir/loans_service:v3"
+    image: "nasimkabir/loans_service:v12"
     container_name: loans_service
+    hostname: loans-service
+    environment:
+      - SPRING_APPLICATION_NAME=loans-service
+      - SERVICE_NAME=loans-service
     ports:
       - "8090:8090"
+    depends_on:
+      eurekaserver:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8090/actuator/health || exit 1" ]
+      #      test: "curl --fail --silent localhost:8761/actuator/health/readiness | grep UP || exit 1"
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eureka-config
+
 
   cards:
-    image: "nasimkabir/cards_service:v3"
+    image: "nasimkabir/cards_service:v12"
     container_name: cards_service
+    hostname: cards-service
+    environment:
+      - SPRING_APPLICATION_NAME=cards-service
+      - SERVICE_NAME=cards-service
     ports:
       - "9000:9000"
+    depends_on:
+      eurekaserver:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9000/actuator/health || exit 1" ]
+      #      test: "curl --fail --silent localhost:8761/actuator/health/readiness | grep UP || exit 1"
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eureka-config
+
+  gateway:
+    image: "nasimkabir/api-gateway-server:v1"
+    container_name: api-gateway-server
+    hostname: api-gateway-server
+    environment:
+      - SPRING_APPLICATION_NAME=api-gateway-server
+      - SERVICE_NAME=api-gateway-server
+#      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE= "http://eurekaserver:8761/eureka/"
+    ports:
+      - "8072:8072"
+    depends_on:
+      accounts:
+        condition: service_healthy
+      loans:
+        condition: service_healthy
+      cards:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
 
 networks:
   nasim_network:
     driver: bridge
+    attachable: true

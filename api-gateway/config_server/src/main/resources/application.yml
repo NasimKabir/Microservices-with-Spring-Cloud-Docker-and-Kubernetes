@@ -16,6 +16,7 @@ spring:
             - 'cards-server'
             - 'loans-server'
             - 'eureka-server'
+            - 'api-gateway-server'
           default-label: main
           clone-on-start: true
           force-pull: true
