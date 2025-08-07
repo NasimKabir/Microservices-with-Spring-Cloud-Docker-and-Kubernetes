@@ -1,0 +1,101 @@
+
+spring:
+  application:
+    name: accounts-service
+
+  profiles:
+    active: prod
+  datasource:
+    url: jdbc:h2:mem:/test
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ''
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  config:
+    import: "optional:configserver:http://${CONFIG_SERVER_HOST:localhost}:8071"
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+
+
+# actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    shutdown:
+      enabled: true
+    health:
+      show-details: always
+
+
+endpoints:
+  shutdown:
+    enabled: true
+
+  info:
+    env:
+      enabled: true
+  profiles:
+    active: test
+
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVICE_URL:http://localhost:8761/eureka/}
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: Accounts Service for managing card operations
+    version: 1.0.0
+
+
+# resilience4j:
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 10
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 5s
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+        permitted-number-of-calls-in-half-open-state: 2
+
+
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 1s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+
+
+  ratelimiter:
+    configs:
+        default:
+            limit-refresh-period: 1s
+            timeout-duration: 1s
+
