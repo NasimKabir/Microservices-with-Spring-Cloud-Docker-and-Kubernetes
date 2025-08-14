@@ -1,0 +1,48 @@
+server:
+  port: 8071
+
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: git
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/NasimKabir/config-server
+          search-paths:
+            - 'accounts-server'
+            - 'cards-server'
+            - 'loans-server'
+            - 'eureka-server'
+            - 'api-gateway-server'
+          default-label: main
+          clone-on-start: true
+          force-pull: true
+
+encrypt:
+  key: my-secret-encryption-key
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  endpoint:
+    shutdown:
+      access: unrestricted
+    health:
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
