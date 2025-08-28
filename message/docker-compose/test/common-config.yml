@@ -1,0 +1,33 @@
+services:
+  network-deploy-service:
+    networks:
+      - nasim_network
+
+  microservice-base-config:
+    extends:
+      service: network-deploy-service
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    environment:
+      CONFIG_SERVER_HOST: "configserver"
+      EUREKA_SERVICE_URL: "http://eurekaserver:8761/eureka/"
+#      SPRING_PROFILES_ACTIVE: "test"
+
+  microservice-configserver-config:
+    extends:
+      service: microservice-base-config
+    environment:
+      SERVICE_NAME: "configserver"
+      SPRING_APPLICATION_NAME: "config-server"
+      SPRING_CONFIG_IMPORT: "optional:configserver:http://configserver:8071"
+
+  microservice-eureka-config:
+    extends:
+      service: microservice-configserver-config
+    environment:
+      SERVICE_NAME: "eurekaserver"
+      SPRING_PROFILES_ACTIVE: "test"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8761/eureka/"
+      EUREKA_INSTANCE_PREFERIPADDRESS: "false"
